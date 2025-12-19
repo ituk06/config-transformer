@@ -1,0 +1,49 @@
+start: (const_decl | dict)*
+
+const_decl: "var" CNAME ":=" value ";"
+
+?value: number
+      | string
+      | bool
+      | array
+      | dict
+      | const_expr
+
+dict: "table(" [pair ("," pair)*] ")"
+
+pair: CNAME "=>" value
+
+array: "{" [value ("," value)*] "}"
+
+const_expr: "|" expr "|"
+
+?expr: term
+     | expr "+" term  -> add
+     | expr "-" term  -> sub
+     | expr "*" term  -> mul
+     | expr "/" term  -> div
+
+?term: number
+     | string
+     | func_call
+     | CNAME          -> var
+     | "(" expr ")"
+
+func_call: CNAME "(" expr ")"
+
+string: /@?\"[^\"]*\"/
+
+bool: /true|false/
+
+number: SIGNED_INT | SIGNED_FLOAT
+
+SIGNED_INT: /-?\d+/
+
+SIGNED_FLOAT: /-?\d+\.\d+/
+
+CNAME: /[a-zA-Z_][a-zA-Z0-9_]*/
+
+COMMENT: /#\[.*?\]#/s
+
+%ignore COMMENT
+%ignore /[ \t\n]+/
